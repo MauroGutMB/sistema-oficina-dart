@@ -6,6 +6,11 @@ serviços: nome, valor, descrição
 ordens de serviço: veículo, peças, serviços, valor total, status (aberta, aprovada, concluída), data/hora de abertura, data/hora de conclusão
 */
 
+// ATENÇÃO
+// deprecado pq eu decidi usar o prisma
+// vai ficar fins de estudo, mas não vai ser usado no projeto final
+// ./prisma/schema.prisma
+
 class Peca {
     marca: string;
     valor: number;
@@ -87,3 +92,5 @@ class OrdemDeServico {
         return valorPecas + valorServicos;
     }
 }
+
+export { Peca, Cliente, Veiculo, Servico, OrdemDeServico };

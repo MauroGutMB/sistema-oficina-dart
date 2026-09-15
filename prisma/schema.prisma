@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Cliente {
+  id       Int       @id @default(autoincrement())
+  nome     String    @db.VarChar(120)
+  cpf      String    @unique @db.Char(11)
+  telefone String?   @db.VarChar(20)
+  endereco String?   @db.VarChar(200)
+  veiculos Veiculo[]
+}
+
+model Veiculo {
+  id        Int     @id @default(autoincrement())
+  modelo    String  @db.VarChar(80)
+  ano       Int     @db.SmallInt
+  placa     String  @unique @db.VarChar(8)
+  clienteId Int
+  cliente   Cliente @relation(fields: [clienteId], references: [id])
+  ordens    Ordem[]
+}
+
+model Peca {
+  id             Int         @id @default(autoincrement())
+  marca          String      @db.VarChar(80)
+  valor          Decimal     @db.Decimal(10, 2)
+  quantidade     Int         @default(0)
+  pontoReposicao Int         @default(0)
+  descontinuada  Boolean     @default(false)
+  ordens         OrdemPeca[]
+}
+
+model Servico {
+  id        Int            @id @default(autoincrement())
+  nome      String         @db.VarChar(120)
+  valor     Decimal        @db.Decimal(10, 2)
+  descricao String?        @db.Text
+  ordens    OrdemServico[]
+}
+
+model Ordem {
+  id                Int            @id @default(autoincrement())
+  veiculoId         Int
+  veiculo           Veiculo        @relation(fields: [veiculoId], references: [id])
+  itens             OrdemPeca[]
+  servicos          OrdemServico[]
+  valorTotal        Decimal        @default(0) @db.Decimal(10, 2)
+  status            StatusOrdem    @default(aberta)
+  dataHoraAbertura  DateTime       @default(now())
+  dataHoraConclusao DateTime?
+}
+
+enum StatusOrdem {
+  aberta
+  aprovada
+  concluida
+}
+
+model OrdemPeca {
+  ordemId       Int
+  pecaId        Int
+  quantidade    Int
+  valorUnitario Decimal @db.Decimal(10, 2)
+  ordem         Ordem   @relation(fields: [ordemId], references: [id], onDelete: Cascade)
+  peca          Peca    @relation(fields: [pecaId], references: [id])
+
+  @@id([ordemId, pecaId])
+}
+
+model OrdemServico {
+  ordemId       Int
+  servicoId     Int
+  valorUnitario Decimal @db.Decimal(10, 2)
+  ordem         Ordem   @relation(fields: [ordemId], references: [id], onDelete: Cascade)
+  servico       Servico @relation(fields: [servicoId], references: [id])
+
+  @@id([ordemId, servicoId])
+}
