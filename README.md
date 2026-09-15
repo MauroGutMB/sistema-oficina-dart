@@ -112,6 +112,23 @@ O `--reset` chama o `prisma migrate reset` e é o modo a usar depois de alterar 
 
 O script lê as credenciais do `.env`, então ele depende do arquivo estar preenchido.
 
+### CLI em Dart
+
+O diretório `cli/` traz um cliente de terminal em Dart que consome a API acima: um menu interativo pra listar, criar, remover e disparar as ações de negócio (repor/descontinuar peça, abrir/aprovar/concluir/cancelar ordem) sem precisar do Postman.
+
+```bash
+# com a API já rodando em outro terminal (node api/server.ts)
+cd cli
+dart pub get
+dart run main.dart
+```
+
+Por padrão o CLI aponta pra `http://localhost:3000`. Pra usar outra URL, defina `OFICINA_API_URL` antes de rodar:
+
+```bash
+OFICINA_API_URL=http://localhost:4000 dart run main.dart
+```
+
 ---
 packages utilizados
 ```

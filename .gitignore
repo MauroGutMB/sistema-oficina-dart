@@ -1,3 +1,9 @@
 node_modules/
 .env
 generated/
+
+# Dart/CLI
+cli/.dart_tool/
+cli/.packages
+cli/pubspec.lock
+cli/build/
