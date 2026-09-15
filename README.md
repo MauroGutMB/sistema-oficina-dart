@@ -1,6 +1,6 @@
-# Atividade 1 - Programação pra Dispositivos Móveis 
+# Atividade 1 - Programação pra Dispositivos Móveis
 
-Aplicação do aprendizado da linguagem dart para desenvolver uma aplicação crud em dart, com o o objetivo de praticar a criação de classes, métodos, atributos e a manipulação de dados. 
+Aplicação do aprendizado da linguagem dart para desenvolver uma aplicação crud em dart, com o o objetivo de praticar a criação de classes, métodos, atributos e a manipulação de dados.
 
 O trabalho consiste em desenvolver um sistema de oficina mecânica, que permita o cadastro de clientes, veículos, peças e serviços, além de gerenciar ordens de serviço e estoque.
 
@@ -30,6 +30,49 @@ estoque das peças usadas, somando peças + mão de obra. Se durante a execuçã
 adicionais, eles vão para nova aprovação e somam ao total;
 se um serviço orçado não for necessário, seu valor é descontado do total final.
 ```
+---
+
+## Endpoints
+
+A API sobe em `http://localhost:3000`.
+
+* `/clientes` - Métodos: GET, POST, DELETE
+  * `/clientes/:id` - Métodos: GET, DELETE
+* `/veiculos` - Métodos: GET, POST, DELETE
+  * `/veiculos/:id` - Métodos: GET, DELETE
+* `/pecas` - Métodos: GET, POST, PATCH
+  * `/pecas/:id` - Métodos: GET
+  * `/pecas/repor` - Métodos: GET
+  * `/pecas/:id/repor` - Métodos: PATCH
+  * `/pecas/:id/descontinuar` - Métodos: PATCH
+* `/servicos` - Métodos: GET, POST, DELETE
+  * `/servicos/:id` - Métodos: GET, DELETE
+* `/ordens` - Métodos: GET, POST, PATCH, DELETE
+  * `/ordens/:id` - Métodos: GET, DELETE
+  * `/ordens/:id/aprovar` - Métodos: PATCH
+  * `/ordens/:id/concluir` - Métodos: PATCH
+
+## Como executar
+
+Pré-requisitos: Node.js e MariaDB instalados.
+
+```bash
+# 1. dependências
+npm install
+
+# 2. banco de dados (no MariaDB)
+CREATE DATABASE oficina CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# 3. variáveis de ambiente
+cp .env.example .env   # e preencha os valores
+
+# 4. tabelas e client do Prisma
+npx prisma migrate dev
+
+# 5. servidor
+node api/server.ts
+```
+
 ---
 packages utilizados
 ```
