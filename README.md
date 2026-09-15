@@ -31,4 +31,17 @@ adicionais, eles vão para nova aprovação e somam ao total;
 se um serviço orçado não for necessário, seu valor é descontado do total final.
 ```
 ---
-
+packages utilizados
+```
+atividade_ppdm@1.0.0 /home/maurogutmb/ifpi/Atividade_ppdm
+├── @prisma/adapter-mariadb@7.10.0
+├── @prisma/client@7.10.0
+├── @types/express@5.0.6
+├── @types/node@26.5.1
+├── dotenv@17.4.2
+├── express@5.2.1
+├── mysql2@3.24.4
+├── prisma@7.10.0
+├── tsx@4.23.13
+└── typescript@7.0.2
+```
