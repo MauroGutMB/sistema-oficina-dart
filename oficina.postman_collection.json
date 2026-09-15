@@ -1,0 +1,563 @@
+{
+  "info": {
+    "name": "Oficina Mecanica API",
+    "description": "Atividade 1 - PPDM. API de servicos mecanicos (Express + Prisma + MariaDB).\n\nDefina a variavel baseUrl na aba Variables (padrao: http://localhost:3000).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Raiz",
+      "item": [
+        {
+          "name": "Listar endpoints",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": []
+            },
+            "description": "Pagina HTML com os endpoints disponiveis."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Clientes",
+      "item": [
+        {
+          "name": "Listar clientes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar cliente por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "1"
+              ]
+            },
+            "description": "Retorna o cliente com seus veiculos. 404 se nao existir."
+          }
+        },
+        {
+          "name": "Criar cliente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clientes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes"
+              ]
+            },
+            "description": "nome e cpf sao obrigatorios. CPF duplicado retorna 409.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Mauro Gutemberg\",\n  \"cpf\": \"12345678901\",\n  \"telefone\": \"89999990000\",\n  \"endereco\": \"Rua A, 123 - Corrente/PI\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remover cliente",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/clientes/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clientes",
+                "1"
+              ]
+            },
+            "description": "409 se o cliente tiver veiculos cadastrados."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Veiculos",
+      "item": [
+        {
+          "name": "Listar veiculos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/veiculos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "veiculos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar veiculo por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/veiculos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "veiculos",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Criar veiculo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/veiculos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "veiculos"
+              ]
+            },
+            "description": "Todos os campos sao obrigatorios. Placa duplicada retorna 409.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"modelo\": \"Gol 1.0\",\n  \"ano\": 2015,\n  \"placa\": \"ABC1D23\",\n  \"clienteId\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remover veiculo",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/veiculos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "veiculos",
+                "1"
+              ]
+            },
+            "description": "409 se o veiculo tiver ordens de servico."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pecas",
+      "item": [
+        {
+          "name": "Listar pecas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pecas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pecas"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Pecas para repor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pecas/repor",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pecas",
+                "repor"
+              ]
+            },
+            "description": "Pecas ativas cujo estoque chegou no ponto de reposicao."
+          }
+        },
+        {
+          "name": "Buscar peca por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pecas/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pecas",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Criar peca",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pecas",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pecas"
+              ]
+            },
+            "description": "marca e valor sao obrigatorios; quantidade e pontoReposicao assumem 0.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"marca\": \"Bosch\",\n  \"valor\": 45.9,\n  \"quantidade\": 10,\n  \"pontoReposicao\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Repor estoque",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/pecas/1/repor",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pecas",
+                "1",
+                "repor"
+              ]
+            },
+            "description": "Entrada de estoque. Peca descontinuada nao pode ser reposta.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantidade\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Descontinuar peca",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pecas/1/descontinuar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "pecas",
+                "1",
+                "descontinuar"
+              ]
+            },
+            "description": "Marca a peca como descontinuada; ela deixa de aparecer em /pecas/repor."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Servicos",
+      "item": [
+        {
+          "name": "Listar servicos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/servicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "servicos"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar servico por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/servicos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "servicos",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Criar servico",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/servicos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "servicos"
+              ]
+            },
+            "description": "nome e valor sao obrigatorios.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Troca de oleo\",\n  \"valor\": 120.0,\n  \"descricao\": \"Inclui filtro e mao de obra\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Remover servico",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/servicos/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "servicos",
+                "1"
+              ]
+            },
+            "description": "409 se o servico ja foi usado em alguma ordem."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ordens de servico",
+      "item": [
+        {
+          "name": "Listar ordens",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordens",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordens"
+              ]
+            },
+            "description": "Traz veiculo, cliente, itens e servicos de cada ordem."
+          }
+        },
+        {
+          "name": "Buscar ordem por id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordens/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordens",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Abrir ordem",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ordens",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordens"
+              ]
+            },
+            "description": "Valida estoque, calcula o total e da baixa nas pecas. Tudo em transacao.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"placa\": \"ABC1D23\",\n  \"itens\": [\n    {\n      \"pecaId\": 1,\n      \"quantidade\": 2\n    }\n  ],\n  \"servicoIds\": [\n    1\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          }
+        },
+        {
+          "name": "Aprovar ordem",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordens/1/aprovar",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordens",
+                "1",
+                "aprovar"
+              ]
+            },
+            "description": "So funciona em ordem com status 'aberta'."
+          }
+        },
+        {
+          "name": "Concluir ordem",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordens/1/concluir",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordens",
+                "1",
+                "concluir"
+              ]
+            },
+            "description": "So funciona em ordem 'aprovada'. Registra data/hora de conclusao."
+          }
+        },
+        {
+          "name": "Cancelar ordem",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ordens/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ordens",
+                "1"
+              ]
+            },
+            "description": "Devolve as pecas ao estoque. Ordem concluida nao pode ser cancelada."
+          }
+        }
+      ]
+    }
+  ]
+}

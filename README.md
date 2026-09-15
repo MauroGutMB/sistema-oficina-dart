@@ -73,6 +73,45 @@ npx prisma migrate dev
 node api/server.ts
 ```
 
+## Testando a API
+
+### Collection do Postman
+
+O arquivo `oficina.postman_collection.json` traz todos os endpoints prontos, agrupados por recurso e com corpos de exemplo já preenchidos.
+
+Para usar: no Postman, **Import** → selecione o arquivo. A URL base fica na variável `{{baseUrl}}` da collection, com valor padrão `http://localhost:3000`.
+
+Sugestão de ordem para um teste completo, já que os recursos dependem uns dos outros:
+
+1. Criar cliente
+2. Criar veículo (usando o `id` do cliente em `clienteId`)
+3. Criar peça e criar serviço
+4. Abrir ordem (com a `placa` do veículo e o `pecaId` da peça)
+5. Listar peças — a quantidade deve ter caído, confirmando a baixa no estoque
+6. Aprovar ordem e depois concluir ordem
+
+Vale testar também os caminhos de erro, que é onde as regras de negócio aparecem: concluir uma ordem ainda não aprovada (400), abrir ordem com quantidade acima do estoque (400), cadastrar CPF repetido (409), remover cliente que possui veículos (409).
+
+### Script de limpeza do banco
+
+O `limpar-banco.sh` esvazia as tabelas entre uma bateria de testes e outra, sem precisar recriar o banco na mão.
+
+```bash
+chmod +x limpar-banco.sh   # só na primeira vez
+
+./limpar-banco.sh          # esvazia as tabelas
+./limpar-banco.sh --seed   # esvazia e insere dados de exemplo
+./limpar-banco.sh --reset  # derruba tudo e reaplica as migrations
+```
+
+O modo padrão usa `TRUNCATE`, que também reinicia os ids em 1 — assim os exemplos da collection do Postman continuam válidos a cada rodada.
+
+O `--seed` deixa o banco com 2 clientes, 2 veículos, 3 peças e 3 serviços. Os dados foram escolhidos para exercitar as regras: uma das peças já está abaixo do ponto de reposição (aparece em `/pecas/repor`) e outra está descontinuada (deve ser recusada ao abrir uma ordem).
+
+O `--reset` chama o `prisma migrate reset` e é o modo a usar depois de alterar o `schema.prisma`.
+
+O script lê as credenciais do `.env`, então ele depende do arquivo estar preenchido.
+
 ---
 packages utilizados
 ```
