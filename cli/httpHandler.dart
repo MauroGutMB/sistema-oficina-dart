@@ -60,6 +60,11 @@ class ApiClient {
     }
 
     request.headers.contentType = ContentType.json;
+    // evita reaproveitar uma conexão keep-alive que o servidor já fechou:
+    // o Node derruba conexões ociosas depois de ~5s, mas o dart:io só
+    // desiste delas depois de 15s, causando "Connection closed before
+    // full header was received" quando o CLI demora entre requisições.
+    request.persistentConnection = false;
     if (corpo != null) {
       request.write(jsonEncode(corpo));
     }

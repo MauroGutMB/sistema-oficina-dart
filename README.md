@@ -129,6 +129,32 @@ Por padrão o CLI aponta pra `http://localhost:3000`. Pra usar outra URL, defina
 OFICINA_API_URL=http://localhost:4000 dart run main.dart
 ```
 
+### App mobile em Flutter
+
+O diretório `mobile/` traz o app **Oficina Atividade**, um cliente Flutter que consome a mesma API pra fazer o CRUD completo (clientes, veículos, peças, serviços e ordens de serviço) direto do celular ou do desktop.
+
+Principais telas e recursos:
+
+- Menu lateral arrastável com acesso a todas as seções, à tela de conexão e ao alternador de tema.
+- Modo claro/escuro, seguindo o sistema por padrão e ajustável manualmente.
+- Listar, criar e remover em cada seção, mais as ações específicas de peça (repor estoque, descontinuar, filtrar as que estão no ponto de reposição) e de ordem (aprovar, concluir, cancelar).
+- Tela de **Conexão**, pra configurar a URL da API em tempo real sem recompilar o app.
+
+```bash
+# com a API já rodando (node api/server.ts)
+cd mobile
+flutter pub get
+flutter run              # detecta automaticamente um dispositivo/emulador conectado
+```
+
+Por padrão o app aponta pra `http://localhost:3000` — ideal pra rodar no desktop (Linux) ou num emulador Android com `adb reverse`:
+
+```bash
+adb reverse tcp:3000 tcp:3000   # com o celular conectado via adb
+```
+
+Se preferir outro endereço (rede Wi-Fi, emulador padrão do Android Studio via `10.0.2.2`, etc.), dá pra mudar a URL a qualquer momento pela tela de Conexão no menu lateral do app, sem precisar reinstalar.
+
 ---
 packages utilizados
 ```
