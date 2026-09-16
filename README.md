@@ -73,6 +73,8 @@ npx prisma migrate dev
 node api/server.ts
 ```
 
+![Servidor rodando e atendendo requisições](imgs/api_print.jpeg)
+
 ## Testando a API
 
 ### Collection do Postman
@@ -91,6 +93,8 @@ Sugestão de ordem para um teste completo, já que os recursos dependem uns dos 
 6. Aprovar ordem e depois concluir ordem
 
 Vale testar também os caminhos de erro, que é onde as regras de negócio aparecem: concluir uma ordem ainda não aprovada (400), abrir ordem com quantidade acima do estoque (400), cadastrar CPF repetido (409), remover cliente que possui veículos (409).
+
+![Collection do Postman listando um cliente cadastrado](imgs/postman_print.jpeg)
 
 ### Script de limpeza do banco
 
@@ -126,8 +130,10 @@ dart run main.dart
 Por padrão o CLI aponta pra `http://localhost:3000`. Pra usar outra URL, defina `OFICINA_API_URL` antes de rodar:
 
 ```bash
-OFICINA_API_URL=http://localhost:4000 dart run main.dart
+OFICINA_API_URL=http://localhost:sua-porta dart run main.dart
 ```
+
+![Menu do CLI listando os clientes cadastrados](imgs/cli_print.jpeg)
 
 ### App mobile em Flutter
 
@@ -154,6 +160,8 @@ adb reverse tcp:3000 tcp:3000   # com o celular conectado via adb
 ```
 
 Se preferir outro endereço (rede Wi-Fi, emulador padrão do Android Studio via `10.0.2.2`, etc.), dá pra mudar a URL a qualquer momento pela tela de Conexão no menu lateral do app, sem precisar reinstalar.
+
+![Menu lateral do app mobile rodando num celular Android](imgs/mobile_print.jpeg)
 
 ---
 packages utilizados
