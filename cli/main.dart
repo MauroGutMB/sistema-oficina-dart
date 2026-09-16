@@ -25,7 +25,7 @@ import 'httpHandler.dart';
 import 'models.dart';
 
 Future<void> main() async {
-  final api = ApiClient();
+  final api = await ApiClient.detectar();
 
   print('=== CLI da Oficina Mecânica ===');
   print('API: ${api.baseUrl}\n');

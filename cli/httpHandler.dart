@@ -8,6 +8,8 @@ ApiException com a mensagem que a API devolveu em `erro`.
 import 'dart:convert';
 import 'dart:io';
 
+import 'gist_discovery.dart';
+
 class ApiException implements Exception {
   final int statusCode;
   final String mensagem;
@@ -27,6 +29,26 @@ class ApiClient {
           baseUrl ??
           Platform.environment['OFICINA_API_URL'] ??
           'http://localhost:3000';
+
+  /// Resolve a URL da API automaticamente: usa `OFICINA_API_URL` se ela
+  /// estiver definida; senão tenta achar uma URL publicada num gist (ver
+  /// gist_discovery.dart, mesmo esquema da tela de Conexão automática do
+  /// app mobile); por fim cai no `http://localhost:3000` de sempre.
+  static Future<ApiClient> detectar() async {
+    final doAmbiente = Platform.environment['OFICINA_API_URL'];
+    if (doAmbiente != null) return ApiClient(baseUrl: doAmbiente);
+
+    stdout.write('Detectando API automaticamente...');
+    final urlDoGist = await descobrirUrlViaGist();
+
+    if (urlDoGist != null) {
+      print(' encontrada: $urlDoGist');
+      return ApiClient(baseUrl: urlDoGist);
+    }
+
+    print(' não encontrada, usando http://localhost:3000.');
+    return ApiClient();
+  }
 
   Future<dynamic> get(String path) => _enviar('GET', path);
 
