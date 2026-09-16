@@ -19,6 +19,7 @@ class ClientesScreen extends StatefulWidget {
 
 class _ClientesScreenState extends State<ClientesScreen> {
   late Future<List<Cliente>> _futuro;
+  String _consulta = '';
 
   @override
   void initState() {
@@ -35,7 +36,7 @@ class _ClientesScreenState extends State<ClientesScreen> {
   /// terminar antes de esconder o indicador.
   Future<void> _recarregar() {
     final futuro = _carregar();
-    setState(() => _futuro = futuro);
+    setState(() { _futuro = futuro; });
     return futuro;
   }
 
@@ -65,7 +66,8 @@ class _ClientesScreenState extends State<ClientesScreen> {
       api: widget.api,
       settings: widget.settings,
       secaoAtual: 'Clientes',
-      onRefresh: _recarregar,
+      searchHint: 'Pesquisar por nome ou CPF...',
+      onSearchChanged: (valor) => setState(() => _consulta = valor),
       body: RefreshIndicator(
         onRefresh: _recarregar,
         child: FutureBuilder<List<Cliente>>(
@@ -77,9 +79,15 @@ class _ClientesScreenState extends State<ClientesScreen> {
             if (snapshot.hasError) {
               return _erro(snapshot.error);
             }
-            final clientes = snapshot.data ?? [];
+            final clientes = (snapshot.data ?? [])
+                .where((c) => combinaPesquisa(_consulta, [c.nome, c.cpf, c.telefone]))
+                .toList();
             if (clientes.isEmpty) {
-              return const VazioLista(mensagem: 'Nenhum cliente cadastrado.');
+              return VazioLista(
+                mensagem: _consulta.isEmpty
+                    ? 'Nenhum cliente cadastrado.'
+                    : 'Nenhum cliente encontrado pra "$_consulta".',
+              );
             }
             return ListView.builder(
               // sempre "arrastável", mesmo com poucos itens, senão o gesto de

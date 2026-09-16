@@ -19,6 +19,7 @@ class OrdensScreen extends StatefulWidget {
 
 class _OrdensScreenState extends State<OrdensScreen> {
   late Future<List<Ordem>> _futuro;
+  String _consulta = '';
 
   @override
   void initState() {
@@ -33,7 +34,7 @@ class _OrdensScreenState extends State<OrdensScreen> {
 
   Future<void> _recarregar() {
     final futuro = _carregar();
-    setState(() => _futuro = futuro);
+    setState(() { _futuro = futuro; });
     return futuro;
   }
 
@@ -83,7 +84,8 @@ class _OrdensScreenState extends State<OrdensScreen> {
       api: widget.api,
       settings: widget.settings,
       secaoAtual: 'Ordens de serviço',
-      onRefresh: _recarregar,
+      searchHint: 'Pesquisar por placa, cliente ou status...',
+      onSearchChanged: (valor) => setState(() => _consulta = valor),
       body: RefreshIndicator(
         onRefresh: _recarregar,
         child: FutureBuilder<List<Ordem>>(
@@ -95,9 +97,21 @@ class _OrdensScreenState extends State<OrdensScreen> {
             if (snapshot.hasError) {
               return ErroLista(mensagem: '${snapshot.error}', onTentarNovamente: _recarregar);
             }
-            final ordens = snapshot.data ?? [];
+            final ordens = (snapshot.data ?? [])
+                .where(
+                  (o) => combinaPesquisa(_consulta, [
+                    o.veiculo?.placa,
+                    o.veiculo?.cliente?.nome,
+                    o.status,
+                  ]),
+                )
+                .toList();
             if (ordens.isEmpty) {
-              return const VazioLista(mensagem: 'Nenhuma ordem cadastrada.');
+              return VazioLista(
+                mensagem: _consulta.isEmpty
+                    ? 'Nenhuma ordem cadastrada.'
+                    : 'Nenhuma ordem encontrada pra "$_consulta".',
+              );
             }
             return ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),

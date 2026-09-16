@@ -20,6 +20,7 @@ class PecasScreen extends StatefulWidget {
 class _PecasScreenState extends State<PecasScreen> {
   late Future<List<Peca>> _futuro;
   bool _somenteParaRepor = false;
+  String _consulta = '';
 
   @override
   void initState() {
@@ -35,7 +36,7 @@ class _PecasScreenState extends State<PecasScreen> {
 
   Future<void> _recarregar() {
     final futuro = _carregar();
-    setState(() => _futuro = futuro);
+    setState(() { _futuro = futuro; });
     return futuro;
   }
 
@@ -101,7 +102,8 @@ class _PecasScreenState extends State<PecasScreen> {
       api: widget.api,
       settings: widget.settings,
       secaoAtual: 'Peças',
-      onRefresh: _recarregar,
+      searchHint: 'Pesquisar por marca...',
+      onSearchChanged: (valor) => setState(() => _consulta = valor),
       appBarActions: [
         IconButton(
           tooltip: _somenteParaRepor ? 'Mostrar todas' : 'Mostrar só as a repor',
@@ -123,12 +125,16 @@ class _PecasScreenState extends State<PecasScreen> {
             if (snapshot.hasError) {
               return ErroLista(mensagem: '${snapshot.error}', onTentarNovamente: _recarregar);
             }
-            final pecas = snapshot.data ?? [];
+            final pecas = (snapshot.data ?? [])
+                .where((p) => combinaPesquisa(_consulta, [p.marca]))
+                .toList();
             if (pecas.isEmpty) {
               return VazioLista(
-                mensagem: _somenteParaRepor
-                    ? 'Nenhuma peça no ponto de reposição.'
-                    : 'Nenhuma peça cadastrada.',
+                mensagem: _consulta.isNotEmpty
+                    ? 'Nenhuma peça encontrada pra "$_consulta".'
+                    : (_somenteParaRepor
+                        ? 'Nenhuma peça no ponto de reposição.'
+                        : 'Nenhuma peça cadastrada.'),
               );
             }
             return ListView.builder(

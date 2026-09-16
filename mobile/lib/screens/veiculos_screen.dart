@@ -19,6 +19,7 @@ class VeiculosScreen extends StatefulWidget {
 
 class _VeiculosScreenState extends State<VeiculosScreen> {
   late Future<List<Veiculo>> _futuro;
+  String _consulta = '';
 
   @override
   void initState() {
@@ -33,7 +34,7 @@ class _VeiculosScreenState extends State<VeiculosScreen> {
 
   Future<void> _recarregar() {
     final futuro = _carregar();
-    setState(() => _futuro = futuro);
+    setState(() { _futuro = futuro; });
     return futuro;
   }
 
@@ -63,7 +64,8 @@ class _VeiculosScreenState extends State<VeiculosScreen> {
       api: widget.api,
       settings: widget.settings,
       secaoAtual: 'Veículos',
-      onRefresh: _recarregar,
+      searchHint: 'Pesquisar por placa, modelo ou dono...',
+      onSearchChanged: (valor) => setState(() => _consulta = valor),
       body: RefreshIndicator(
         onRefresh: _recarregar,
         child: FutureBuilder<List<Veiculo>>(
@@ -75,9 +77,15 @@ class _VeiculosScreenState extends State<VeiculosScreen> {
             if (snapshot.hasError) {
               return ErroLista(mensagem: '${snapshot.error}', onTentarNovamente: _recarregar);
             }
-            final veiculos = snapshot.data ?? [];
+            final veiculos = (snapshot.data ?? [])
+                .where((v) => combinaPesquisa(_consulta, [v.placa, v.modelo, v.cliente?.nome]))
+                .toList();
             if (veiculos.isEmpty) {
-              return const VazioLista(mensagem: 'Nenhum veículo cadastrado.');
+              return VazioLista(
+                mensagem: _consulta.isEmpty
+                    ? 'Nenhum veículo cadastrado.'
+                    : 'Nenhum veículo encontrado pra "$_consulta".',
+              );
             }
             return ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),

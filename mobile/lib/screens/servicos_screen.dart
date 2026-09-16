@@ -19,6 +19,7 @@ class ServicosScreen extends StatefulWidget {
 
 class _ServicosScreenState extends State<ServicosScreen> {
   late Future<List<Servico>> _futuro;
+  String _consulta = '';
 
   @override
   void initState() {
@@ -33,7 +34,7 @@ class _ServicosScreenState extends State<ServicosScreen> {
 
   Future<void> _recarregar() {
     final futuro = _carregar();
-    setState(() => _futuro = futuro);
+    setState(() { _futuro = futuro; });
     return futuro;
   }
 
@@ -63,7 +64,8 @@ class _ServicosScreenState extends State<ServicosScreen> {
       api: widget.api,
       settings: widget.settings,
       secaoAtual: 'Serviços',
-      onRefresh: _recarregar,
+      searchHint: 'Pesquisar por nome...',
+      onSearchChanged: (valor) => setState(() => _consulta = valor),
       body: RefreshIndicator(
         onRefresh: _recarregar,
         child: FutureBuilder<List<Servico>>(
@@ -75,9 +77,15 @@ class _ServicosScreenState extends State<ServicosScreen> {
             if (snapshot.hasError) {
               return ErroLista(mensagem: '${snapshot.error}', onTentarNovamente: _recarregar);
             }
-            final servicos = snapshot.data ?? [];
+            final servicos = (snapshot.data ?? [])
+                .where((s) => combinaPesquisa(_consulta, [s.nome, s.descricao]))
+                .toList();
             if (servicos.isEmpty) {
-              return const VazioLista(mensagem: 'Nenhum serviço cadastrado.');
+              return VazioLista(
+                mensagem: _consulta.isEmpty
+                    ? 'Nenhum serviço cadastrado.'
+                    : 'Nenhum serviço encontrado pra "$_consulta".',
+              );
             }
             return ListView.builder(
               physics: const AlwaysScrollableScrollPhysics(),

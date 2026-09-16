@@ -39,3 +39,12 @@ String? numeroObrigatorio(String? valor) {
   if (num.tryParse(valor.replaceAll(',', '.')) == null) return 'Número inválido';
   return null;
 }
+
+/// Testa se algum dos [campos] contém [consulta] (sem diferenciar
+/// maiúsculas/minúsculas). Consulta vazia sempre combina — assim as telas
+/// de lista podem usar isso direto no filtro sem checar o caso vazio antes.
+bool combinaPesquisa(String consulta, Iterable<String?> campos) {
+  final alvo = consulta.trim().toLowerCase();
+  if (alvo.isEmpty) return true;
+  return campos.any((campo) => campo != null && campo.toLowerCase().contains(alvo));
+}

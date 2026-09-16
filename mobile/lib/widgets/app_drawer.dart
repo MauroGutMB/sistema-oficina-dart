@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../api_client.dart';
 import '../app_settings.dart';
 import '../navigation.dart';
+import '../screens/busca_geral_screen.dart';
 import '../screens/settings_screen.dart';
 
 /// Menu lateral (arrastável a partir da borda esquerda) com acesso a todas
@@ -66,6 +67,11 @@ class AppDrawer extends StatelessWidget {
               onTap: () => _irParaInicio(context),
             ),
             const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.travel_explore_outlined),
+              title: const Text('Pesquisa geral'),
+              onTap: () => _navegarPara(context, BuscaGeralScreen(api: api, settings: settings)),
+            ),
             Expanded(
               child: ListView(
                 children: [
