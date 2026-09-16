@@ -101,16 +101,19 @@ Vale testar também os caminhos de erro, que é onde as regras de negócio apare
 O `limpar-banco.sh` esvazia as tabelas entre uma bateria de testes e outra, sem precisar recriar o banco na mão.
 
 ```bash
-chmod +x limpar-banco.sh   # só na primeira vez
+chmod +x limpar-banco.sh      # só na primeira vez
 
-./limpar-banco.sh          # esvazia as tabelas
-./limpar-banco.sh --seed   # esvazia e insere dados de exemplo
-./limpar-banco.sh --reset  # derruba tudo e reaplica as migrations
+./limpar-banco.sh             # esvazia as tabelas
+./limpar-banco.sh --seed      # esvazia e insere dados de exemplo realistas
+./limpar-banco.sh --seed-nuke # uma leva de dados genéricos
+./limpar-banco.sh --reset     # derruba tudo e reaplica as migrations
 ```
 
 O modo padrão usa `TRUNCATE`, que também reinicia os ids em 1 — assim os exemplos da collection do Postman continuam válidos a cada rodada.
 
-O `--seed` deixa o banco com 2 clientes, 2 veículos, 3 peças e 3 serviços. Os dados foram escolhidos para exercitar as regras: uma das peças já está abaixo do ponto de reposição (aparece em `/pecas/repor`) e outra está descontinuada (deve ser recusada ao abrir uma ordem).
+O `--seed` deixa o banco com um cenário plausível de oficina: 8 clientes (um deles com dois veículos), 9 veículos, 8 peças, 6 serviços e 4 ordens passando pelos três status (`aberta`, `aprovada`, `concluída`), com itens e serviços de verdade em cada uma. Os dados foram escolhidos pra exercitar as regras de negócio: duas peças já abaixo do ponto de reposição (aparecem em `/pecas/repor`) e duas descontinuadas — uma delas usada numa ordem antiga, simulando uma peça que saiu de linha depois.
+
+O `--seed-nuke` é diferente dos outros modos: **não esvazia nada**, é incremental — cada execução soma mais uma leva de dados genéricos (10 mil clientes, 17.500 veículos, 3 mil peças, 2 mil serviços e 25 mil ordens, tudo via `WITH RECURSIVE` direto no MariaDB) em cima do que já existe, sem tocar nos dados anteriores. Rodar várias vezes seguidas faz o banco crescer de verdade a cada vez — útil pra simular um sistema em produção há anos e testar paginação, performance de listagem, etc. Nomes tipo "Cliente Teste 000042" deixam claro que é dado sintético, não pra usar em demonstração.
 
 O `--reset` chama o `prisma migrate reset` e é o modo a usar depois de alterar o `schema.prisma`.
 
