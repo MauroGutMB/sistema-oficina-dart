@@ -161,7 +161,7 @@ adb reverse tcp:3000 tcp:3000   # com o celular conectado via adb
 
 Se preferir outro endereço (rede Wi-Fi, emulador padrão do Android Studio via `10.0.2.2`, etc.), dá pra mudar a URL a qualquer momento pela tela de Conexão no menu lateral do app, sem precisar reinstalar.
 
-![Menu lateral do app mobile rodando num celular Android](imgs/mobile_print.jpeg)
+<img src="imgs/mobile_print.jpeg" alt="Menu lateral do app mobile rodando num celular Android" width="280" />
 
 ---
 packages utilizados
