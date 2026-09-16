@@ -1,7 +1,0 @@
-name: oficina_cli
-description: CLI em Dart para controlar a API da Oficina Mecânica via terminal.
-publish_to: 'none'
-version: 1.0.0
-
-environment:
-  sdk: '>=3.0.0 <4.0.0'

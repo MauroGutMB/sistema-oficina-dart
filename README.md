@@ -1,3 +1,8 @@
+> **Esta é a branch `api`.** Ela existe pra quem quer só a API — sem o CLI em Dart nem o app mobile em Flutter, que ficam na branch [`main`](../../tree/main). Clone/checkout só essa branch se o que você quer é rodar ou integrar com a API de Serviços Mecânicos:
+> ```bash
+> git clone --branch api --single-branch <url-do-repo>
+> ```
+
 # Atividade 1 - Programação pra Dispositivos Móveis
 
 Aplicação do aprendizado da linguagem dart para desenvolver uma aplicação crud em dart, com o o objetivo de praticar a criação de classes, métodos, atributos e a manipulação de dados.
@@ -32,29 +37,92 @@ se um serviço orçado não for necessário, seu valor é descontado do total fi
 ```
 ---
 
+## Stack
+
+* **Express 5** + **TypeScript**, rodando direto via `node --experimental-strip-types` (sem passo de build — os `.ts` da API são executados como estão)
+* **Prisma 7** como ORM, com o `@prisma/adapter-mariadb` (driver adapter nativo, sem depender do client MySQL do sistema)
+* **MariaDB** como banco
+* Middleware de log próprio (`api/middleware_logger.ts`), colorindo por faixa de status (2xx verde, 3xx ciano, 4xx/5xx vermelho) e medindo a duração de cada requisição
+
+## Modelo de dados
+
+Definido em `prisma/schema.prisma`, cinco entidades principais mais duas tabelas de associação:
+
+* **Cliente** — `nome`, `cpf` (único, 11 chars), `telefone?`, `endereco?`; um cliente tem vários `Veiculo`.
+* **Veiculo** — `modelo`, `ano`, `placa` (única), `clienteId`; um veículo tem várias `Ordem`.
+* **Peca** — `marca`, `valor` (Decimal 10,2), `quantidade` (default 0), `pontoReposicao` (default 0), `descontinuada` (default false).
+* **Servico** — `nome`, `valor` (Decimal 10,2), `descricao?`.
+* **Ordem** — `veiculoId`, `valorTotal` (calculado na abertura), `status` (`aberta` → `aprovada` → `concluida`), `dataHoraAbertura` (default now), `dataHoraConclusao?`.
+* **OrdemPeca** / **OrdemServico** — tabelas de associação (chave composta `ordemId`+`pecaId`/`servicoId`) que guardam a **quantidade** e o **`valorUnitario` congelado no momento da abertura** da ordem — reajustes de preço em `Peca`/`Servico` depois não afetam ordens já abertas.
+
 ## Endpoints
 
-A API sobe em `http://localhost:3000`.
+A API sobe em `http://localhost:3000`. Todas as respostas são JSON; erros vêm no formato `{ "erro": "mensagem" }`. `GET /` lista os endpoints disponíveis em HTML.
 
-* `/clientes` - Métodos: GET, POST, DELETE
-  * `/clientes/:id` - Métodos: GET, DELETE
-* `/veiculos` - Métodos: GET, POST, DELETE
-  * `/veiculos/:id` - Métodos: GET, DELETE
-* `/pecas` - Métodos: GET, POST, PATCH
-  * `/pecas/:id` - Métodos: GET
-  * `/pecas/repor` - Métodos: GET
-  * `/pecas/:id/repor` - Métodos: PATCH
-  * `/pecas/:id/descontinuar` - Métodos: PATCH
-* `/servicos` - Métodos: GET, POST, DELETE
-  * `/servicos/:id` - Métodos: GET, DELETE
-* `/ordens` - Métodos: GET, POST, PATCH, DELETE
-  * `/ordens/:id` - Métodos: GET, DELETE
-  * `/ordens/:id/aprovar` - Métodos: PATCH
-  * `/ordens/:id/concluir` - Métodos: PATCH
+### Clientes
+
+| Método | Rota | Corpo | Sucesso | Erros |
+|---|---|---|---|---|
+| GET | `/clientes` | — | 200, lista ordenada por nome | |
+| GET | `/clientes/:id` | — | 200, cliente com `veiculos` incluídos | 404 se não existe |
+| POST | `/clientes` | `{ nome, cpf, telefone?, endereco? }` | 201, cliente criado | 400 se faltar `nome`/`cpf`; 409 se o `cpf` já existe |
+| DELETE | `/clientes/:id` | — | 204 | 409 se o cliente tem veículos cadastrados |
+
+### Veículos
+
+| Método | Rota | Corpo | Sucesso | Erros |
+|---|---|---|---|---|
+| GET | `/veiculos` | — | 200, lista com `cliente` incluído | |
+| GET | `/veiculos/:id` | — | 200, veículo com `cliente` e `ordens` incluídos | 404 se não existe |
+| POST | `/veiculos` | `{ modelo, ano, placa, clienteId }` | 201, veículo criado | 400 se faltar algum campo; 409 se `clienteId` não existe, ou se a `placa` já existe |
+| DELETE | `/veiculos/:id` | — | 204 | 409 se o veículo tem ordens |
+
+### Peças
+
+| Método | Rota | Corpo | Sucesso | Erros |
+|---|---|---|---|---|
+| GET | `/pecas` | — | 200, lista ordenada por marca | |
+| GET | `/pecas/repor` | — | 200, peças ativas com `quantidade <= pontoReposicao` | |
+| GET | `/pecas/:id` | — | 200 | 404 se não existe |
+| POST | `/pecas` | `{ marca, valor, quantidade?, pontoReposicao? }` | 201 (`quantidade`/`pontoReposicao` default 0) | 400 se faltar `marca`/`valor` |
+| PATCH | `/pecas/:id/repor` | `{ quantidade }` | 200, `quantidade` incrementada | 400 se `quantidade <= 0`, se a peça não existe ou está descontinuada |
+| PATCH | `/pecas/:id/descontinuar` | — | 200, marca `descontinuada: true` | 404 se não existe |
+
+> `GET /pecas/repor` precisa vir registrado **antes** de `GET /pecas/:id` nas rotas, senão o Express interpreta "repor" como um `:id`.
+
+### Serviços
+
+| Método | Rota | Corpo | Sucesso | Erros |
+|---|---|---|---|---|
+| GET | `/servicos` | — | 200, lista ordenada por nome | |
+| GET | `/servicos/:id` | — | 200 | 404 se não existe |
+| POST | `/servicos` | `{ nome, valor, descricao? }` | 201 | 400 se faltar `nome`/`valor` |
+| DELETE | `/servicos/:id` | — | 204 | 409 se o serviço já foi usado em alguma ordem |
+
+### Ordens de serviço
+
+| Método | Rota | Corpo | Sucesso | Erros |
+|---|---|---|---|---|
+| GET | `/ordens` | — | 200, lista com `veiculo`, `itens.peca` e `servicos.servico` incluídos, mais recentes primeiro | |
+| GET | `/ordens/:id` | — | 200, com as mesmas relações incluídas | 404 se não existe |
+| POST | `/ordens` | `{ placa, itens?: [{ pecaId, quantidade }], servicoIds?: number[] }` | 201, ordem `aberta` | 400 se faltar `placa`, se não houver nenhum item/serviço, se o veículo/peça/serviço não existir, se alguma peça estiver descontinuada ou sem estoque suficiente |
+| PATCH | `/ordens/:id/aprovar` | — | 200, `aberta` → `aprovada` | 400 se a ordem não existe ou não está `aberta` |
+| PATCH | `/ordens/:id/concluir` | — | 200, `aprovada` → `concluida`, grava `dataHoraConclusao` | 400 se a ordem não existe ou não está `aprovada` |
+| DELETE | `/ordens/:id` | — | 204, cancela e devolve as peças reservadas ao estoque | 400 se a ordem não existe ou já está `concluida` |
+
+## Regras de negócio
+
+A camada de regras fica isolada em `api/service.ts`, sem lógica de negócio nas rotas (`api/routes.ts` só valida entrada e traduz erros em status HTTP). Os pontos que exigem mais cuidado:
+
+* **Abertura de ordem é transacional** (`prisma.$transaction`): valida o veículo, cada peça (existe, não está descontinuada, tem estoque suficiente) e cada serviço **antes** de alterar qualquer estoque; calcula `valorTotal` somando peças + mão de obra; congela o `valorUnitario` de cada item no momento da abertura; só então dá baixa no estoque. Se qualquer validação falhar, nada é gravado.
+* **Cancelamento também é transacional**: devolve a quantidade de cada `OrdemPeca` ao estoque antes de apagar a ordem.
+* **Transições de status são estritas**: só é possível aprovar uma ordem `aberta`, só é possível concluir uma `aprovada`, e não dá pra cancelar uma `concluida`.
+* **Integridade referencial verificada manualmente**: remover cliente com veículos, veículo com ordens, ou serviço já usado numa ordem retorna 409 em vez de deixar o banco quebrar por causa de FK.
+* **Peça descontinuada não pode ser reposta nem entrar numa nova ordem**, mas continua listada (pra manter histórico).
 
 ## Como executar
 
-Pré-requisitos: Node.js e MariaDB instalados.
+Pré-requisitos: Node.js (com suporte nativo a TypeScript — usado aqui via `node api/server.ts` direto, sem `tsx`/`ts-node`) e MariaDB instalados.
 
 ```bash
 # 1. dependências
@@ -116,52 +184,11 @@ O `--reset` chama o `prisma migrate reset` e é o modo a usar depois de alterar 
 
 O script lê as credenciais do `.env`, então ele depende do arquivo estar preenchido.
 
-### CLI em Dart
+---
 
-O diretório `cli/` traz um cliente de terminal em Dart que consome a API acima: um menu interativo pra listar, criar, remover e disparar as ações de negócio (repor/descontinuar peça, abrir/aprovar/concluir/cancelar ordem) sem precisar do Postman.
+## Clientes desta API
 
-```bash
-# com a API já rodando em outro terminal (node api/server.ts)
-cd cli
-dart pub get
-dart run main.dart
-```
-
-Por padrão o CLI aponta pra `http://localhost:3000`. Pra usar outra URL, defina `OFICINA_API_URL` antes de rodar:
-
-```bash
-OFICINA_API_URL=http://localhost:sua-porta dart run main.dart
-```
-
-![Menu do CLI listando os clientes cadastrados](imgs/cli_print.jpeg)
-
-### App mobile em Flutter
-
-O diretório `mobile/` traz o app **Oficina Atividade**, um cliente Flutter que consome a mesma API pra fazer o CRUD completo (clientes, veículos, peças, serviços e ordens de serviço) direto do celular ou do desktop.
-
-Principais telas e recursos:
-
-- Menu lateral arrastável com acesso a todas as seções, à tela de conexão e ao alternador de tema.
-- Modo claro/escuro, seguindo o sistema por padrão e ajustável manualmente.
-- Listar, criar e remover em cada seção, mais as ações específicas de peça (repor estoque, descontinuar, filtrar as que estão no ponto de reposição) e de ordem (aprovar, concluir, cancelar).
-- Tela de **Conexão**, pra configurar a URL da API em tempo real sem recompilar o app.
-
-```bash
-# com a API já rodando (node api/server.ts)
-cd mobile
-flutter pub get
-flutter run              # detecta automaticamente um dispositivo/emulador conectado
-```
-
-Por padrão o app aponta pra `http://localhost:3000` — ideal pra rodar no desktop (Linux) ou num emulador Android com `adb reverse`:
-
-```bash
-adb reverse tcp:3000 tcp:3000   # com o celular conectado via adb
-```
-
-Se preferir outro endereço (rede Wi-Fi, emulador padrão do Android Studio via `10.0.2.2`, etc.), dá pra mudar a URL a qualquer momento pela tela de Conexão no menu lateral do app, sem precisar reinstalar.
-
-<img src="imgs/mobile_print.jpeg" alt="Menu lateral do app mobile rodando num celular Android" width="280" />
+O CLI em Dart e o app mobile em Flutter que consomem esta API (com CRUD completo pra todas as entidades acima) ficam na branch [`main`](../../tree/main) deste repositório — esta branch (`api`) traz só o backend.
 
 ---
 packages utilizados
