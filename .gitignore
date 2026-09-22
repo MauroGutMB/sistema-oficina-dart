@@ -7,3 +7,4 @@ cli/.dart_tool/
 cli/.packages
 cli/pubspec.lock
 cli/build/
+cli/oficina_local.db

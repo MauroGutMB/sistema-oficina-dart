@@ -8,7 +8,7 @@ ApiException com a mensagem que a API devolveu em `erro`.
 import 'dart:convert';
 import 'dart:io';
 
-import 'gist_discovery.dart';
+import 'api_como_servico.dart';
 
 class ApiException implements Exception {
   final int statusCode;
@@ -20,7 +20,7 @@ class ApiException implements Exception {
   String toString() => 'Erro $statusCode: $mensagem';
 }
 
-class ApiClient {
+class ApiClient implements ApiComoServico {
   final String baseUrl;
   final HttpClient _client = HttpClient();
 
@@ -30,34 +30,32 @@ class ApiClient {
           Platform.environment['OFICINA_API_URL'] ??
           'http://localhost:3000';
 
-  /// Resolve a URL da API automaticamente: usa `OFICINA_API_URL` se ela
-  /// estiver definida; senão tenta achar uma URL publicada num gist (ver
-  /// gist_discovery.dart, mesmo esquema da tela de Conexão automática do
-  /// app mobile); por fim cai no `http://localhost:3000` de sempre.
-  static Future<ApiClient> detectar() async {
-    final doAmbiente = Platform.environment['OFICINA_API_URL'];
-    if (doAmbiente != null) return ApiClient(baseUrl: doAmbiente);
+  @override
+  String get origem => baseUrl;
 
-    stdout.write('Detectando API automaticamente...');
-    final urlDoGist = await descobrirUrlViaGist();
-
-    if (urlDoGist != null) {
-      print(' encontrada: $urlDoGist');
-      return ApiClient(baseUrl: urlDoGist);
+  /// Checagem rápida de conectividade, usada pra decidir se essa URL serve
+  /// antes de comprometer o CLI inteiro com ela.
+  Future<bool> respondendo({Duration tempoLimite = const Duration(seconds: 3)}) async {
+    try {
+      await _enviar('GET', '/clientes').timeout(tempoLimite);
+      return true;
+    } catch (_) {
+      return false;
     }
-
-    print(' não encontrada, usando http://localhost:3000.');
-    return ApiClient();
   }
 
+  @override
   Future<dynamic> get(String path) => _enviar('GET', path);
 
+  @override
   Future<dynamic> post(String path, [Map<String, dynamic>? corpo]) =>
       _enviar('POST', path, corpo: corpo);
 
+  @override
   Future<dynamic> patch(String path, [Map<String, dynamic>? corpo]) =>
       _enviar('PATCH', path, corpo: corpo);
 
+  @override
   Future<dynamic> delete(String path) => _enviar('DELETE', path);
 
   Future<dynamic> _enviar(
@@ -113,5 +111,6 @@ class ApiClient {
     return decodificado;
   }
 
+  @override
   void close() => _client.close(force: true);
 }

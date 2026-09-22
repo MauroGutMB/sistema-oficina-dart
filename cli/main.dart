@@ -21,14 +21,16 @@ Endpoints consumidos (ver README.md na raiz do projeto):
 
 import 'dart:io';
 
-import 'httpHandler.dart';
+import 'api_como_servico.dart';
+import 'api_factory.dart';
+import 'httpHandler.dart' show ApiException;
 import 'models.dart';
 
 Future<void> main() async {
-  final api = await ApiClient.detectar();
+  final api = await detectarApi();
 
   print('=== CLI da Oficina Mecânica ===');
-  print('API: ${api.baseUrl}\n');
+  print('API: ${api.origem}\n');
 
   var executando = true;
   while (executando) {
@@ -126,7 +128,7 @@ void listar(String titulo, List itens) {
 
 // ---------- clientes ----------
 
-Future<void> menuClientes(ApiClient api) async {
+Future<void> menuClientes(ApiComoServico api) async {
   print('\n--- Clientes ---');
   print('1. Listar');
   print('2. Buscar por ID');
@@ -176,7 +178,7 @@ Future<void> menuClientes(ApiClient api) async {
 
 // ---------- veiculos ----------
 
-Future<void> menuVeiculos(ApiClient api) async {
+Future<void> menuVeiculos(ApiComoServico api) async {
   print('\n--- Veículos ---');
   print('1. Listar');
   print('2. Buscar por ID');
@@ -226,7 +228,7 @@ Future<void> menuVeiculos(ApiClient api) async {
 
 // ---------- pecas ----------
 
-Future<void> menuPecas(ApiClient api) async {
+Future<void> menuPecas(ApiComoServico api) async {
   print('\n--- Peças ---');
   print('1. Listar');
   print('2. Buscar por ID');
@@ -290,7 +292,7 @@ Future<void> menuPecas(ApiClient api) async {
 
 // ---------- servicos ----------
 
-Future<void> menuServicos(ApiClient api) async {
+Future<void> menuServicos(ApiComoServico api) async {
   print('\n--- Serviços ---');
   print('1. Listar');
   print('2. Buscar por ID');
@@ -334,7 +336,7 @@ Future<void> menuServicos(ApiClient api) async {
 
 // ---------- ordens ----------
 
-Future<void> menuOrdens(ApiClient api) async {
+Future<void> menuOrdens(ApiComoServico api) async {
   print('\n--- Ordens de serviço ---');
   print('1. Listar');
   print('2. Buscar por ID');
@@ -383,7 +385,7 @@ Future<void> menuOrdens(ApiClient api) async {
   }
 }
 
-Future<void> abrirOrdem(ApiClient api) async {
+Future<void> abrirOrdem(ApiComoServico api) async {
   final placa = lerLinha('Placa do veículo: ');
 
   final itens = <Map<String, dynamic>>[];
